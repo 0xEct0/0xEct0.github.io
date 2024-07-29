@@ -41,7 +41,7 @@ Once the head of a linked list of either module list has been acquired, the func
 
 ![peb_module_lookup.png](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/peb_module_lookup.png)
 
-{% raw %}
+```c
 inline LPVOID get_module_by_name( wchar_t* module_name )
 {
     // w// printf( L"[*] Finding address of module: %ls\n", module_name );
@@ -89,7 +89,7 @@ inline LPVOID get_module_by_name( wchar_t* module_name )
         }
 
         // wprintf( L"current_module: %ls\n", current_module );
-         
+        
         for( i = 0; i < buffer_len && module_name[i] != '\0'; i++ )
         {
             if( TO_LOWER( current_link->BaseDllName.Buffer[i] ) != module_name[i] )
@@ -126,13 +126,13 @@ inline LPVOID get_module_by_name( wchar_t* module_name )
     // printf( "[+] Error?\n" );
     return return_module;
 }
-{% endraw %}
+```
 
 Once the base address of a DLL has been obtained by traversing the PEB as described in the previous section, the next step in refactoring code to become position independent is the creation of a function that will get the absolute address of a function that resides within that module/DLL. This process is important for executing specific functionalities without the need for using relative addresses, meaning this would enable the program to execute from anywhere in memory.
 
 Starting from the base address of the DLL, the function would need to parse the DLL's internal structures to find the function of interest which starts with the Portable Executable (PE) header which can be accessed directly from the DLL's base address. The PE header is an array that includes various directories but the index of interest is the one in the first index which is the Export Table. This table lists all the functions that the DLL exports along with their names and relative addresses. Once access to the Export Table has been successfully found, the code would then have to traverse through the list of exported functions where each entry in the Export Table includes the function's name and an offset from the DLL's base address. Upon comparison of the parsed function's name and the function name the code is looking for, calculation of the absolute address needs to be done by getting the offset and adding it to the base address of the DLL. Once the calculation has been completed, the code should then return the absolute address of that function which means the program can now directly call the Windows API function from anywhere in memory. The following below is the code to do this, along with a graphical representation of traversing internal structures to get to the Exports Table.
 
-{% raw %}
+```c
 //
 // This function gets the function address from the module
 // 
@@ -253,7 +253,7 @@ inline LPVOID get_func_by_name( LPVOID module, char* function_name )
 
     return return_address;
 }
-{% endraw %}
+```
 
 ![Untitled](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/export_table.png)
 
@@ -271,7 +271,7 @@ These APIs will allow us to load other DLLs even if not loaded by the resulting 
 
  
 
-{% raw %}
+```c
 
     char get_proc_addr[] = { 'G', 'e', 't', 'P', 'r', 'o', 'c', 'A', 'd', 'd', 'r', 'e', 's', 's', '\0' }; 
 
@@ -303,13 +303,13 @@ These APIs will allow us to load other DLLs even if not loaded by the resulting 
         // printf( "[!] LoadLibraryA or GetProcAddress could not be resolved!\n" );
         return 1;
     }
-{% endraw %}
+```
 
 ## Position Independent Code for a Reverse Shell
 
 Once we’ve dynamically resolved those two functions, we can load other modules and API’s that reside within that module. For example, for reverse shell/network operations, we’ll use APIs within `ws2_32.dll` . Here’s how we can get the address of that DLL, along with `WSAStartup()` which is an API function needed for network operations.
 
-{% raw %}
+```c
     //
     // Get address of ws2_32.dll
     //
@@ -345,7 +345,7 @@ Once we’ve dynamically resolved those two functions, we can load other modules
         // printf( "[+] Could not dynamically resolve _WSAStartup!\n" );
         return 1;
     }
-{% endraw %}
+```
 
 In the case of `WSAStartup`, we use a similar approach as with `GetProcAddress` and `LoadLibraryA`  to dynamically resolve the function's address:
 
@@ -355,7 +355,7 @@ In the case of `WSAStartup`, we use a similar approach as with `GetProcAddress` 
 
 This process can be repeated to essentially refactor code to be position independent. The follow code below is from [https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html](https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html) which shows how to program a reverse shell in C/C++.
 
-{% raw %}
+```c
 //
 // code inspired from https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html
 // 
@@ -403,11 +403,11 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-{% endraw %}
+```
 
 We can refactor all of the WinAPIs used in the above code to become position indepent, similar to the example above with `WSAStartup`. Below is the code that’s been refactored to be position independent (final code, along with the header file containing the PEB structures can be found on my github here: https://github.com/0xEct0/Shellcode-Generate/blob/main/code_templates/rev_shell.c )
 
-{% raw %}
+```c
 #include <stdio.h>
 #include <winsock2.h>
 #include <windows.h>
@@ -1002,8 +1002,7 @@ inline LPVOID get_func_by_name( LPVOID module, char* function_name )
 
     return return_address;
 }
-
-{% endraw %}
+```
 
 ## From PIC to Shellcode
 
