@@ -814,11 +814,12 @@ Essentially:
 1. Compile to ASM: `cl.exe /c /FA /GS- rev_shell.c` 
 2. Remove XDATA/PDATA segments in `rev_shell.asm`
 3. Remove external libaries (`INCLUDELIB LITCMT`/`INCLUDELIB OLDNAMES` at the top) in `rev_shell.asm`
-4. Fix stack algiment by adding the following in the `_TEXT SEGMENT`: 
-
+4. Fix stack algiment by adding the code excerpt below in the `_TEXT SEGMENT`
+5. Change the line `mov rax, QWORD PTR gs:96` to `mov rax, QWORD PTR gs:[96]` 
 
 ```assembly
 
+; ADD THIS TO THE _TEXT SEGMENT
 ; https://github.com/mattifestation/PIC_Bindshell/blob/master/PIC_Bindshell/AdjustStack.asm
 ; AlignRSP is a simple call stub that ensures that the stack is 16-byte aligned prior
 ; to calling the entry point of the payload. This is necessary because 64-bit functions
@@ -841,7 +842,7 @@ AlignRSP ENDP
 
 ```
 
-5. Change the line `mov rax, QWORD PTR gs:96` to `mov rax, QWORD PTR gs:[96]` 
+
 
 Once those steps are done, link to an exe using:  `ml64.exe rev_shell.asm /link /entry:AlignRSP` . This will compile it to an exe in which you can execute and test.
 
