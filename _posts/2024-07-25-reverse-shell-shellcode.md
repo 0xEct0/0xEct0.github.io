@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Creating Reverse Shell Shellcode from C
+title: Reverse Shell Shellcoding from C
 subtitle: Developing position independent code to connect to a reverse shell
 tags: [red team, malware development]
 ---
