@@ -39,7 +39,7 @@ The first step is to develop a function to locate the address of `kernel32.dll` 
 
 Once the head of a linked list of either module list has been acquired, the function should then traverse and examine each node's "LDR_DATA_TABLE_ENTRY" which represents an individual module. There are two fields of interests, the "BaseDllName" and the "DllBase." The function should compare the name of the DLL it is looking for to the "BaseDllName", and if it matches return the "DllBase", otherwise go to the next node of the linked list. Below contains a graphical reference of traversing the PEB to find a specific module’s base address along with the corresponding C code.
 
-![peb_module_lookup.png](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/peb_module_lookup.png)
+![peb_module_lookup.png](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/images/peb_module_lookup.png)
 
 ```c
 
@@ -258,7 +258,7 @@ inline LPVOID get_func_by_name( LPVOID module, char* function_name )
 
 ```
 
-![Untitled](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/export_table.png)
+![Untitled](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/images/export_table.png)
 
 Now that two key functions have been developed to:
 
@@ -841,8 +841,6 @@ AlignRSP PROC
 AlignRSP ENDP
 
 ```
-
-
 
 Once those steps are done, link to an exe using:  `ml64.exe rev_shell.asm /link /entry:AlignRSP` . This will compile it to an exe in which you can execute and test.
 
