@@ -42,9 +42,10 @@ Once the head of a linked list of either module list has been acquired, the func
 ![peb_module_lookup.png](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/peb_module_lookup.png)
 
 ```c
+
 inline LPVOID get_module_by_name( wchar_t* module_name )
 {
-    // w// printf( L"[*] Finding address of module: %ls\n", module_name );
+    // wprintf( L"[*] Finding address of module: %ls\n", module_name );
     //
     // Access the PEB from GS register offset x60
     // 
@@ -133,6 +134,7 @@ Once the base address of a DLL has been obtained by traversing the PEB as descri
 Starting from the base address of the DLL, the function would need to parse the DLL's internal structures to find the function of interest which starts with the Portable Executable (PE) header which can be accessed directly from the DLL's base address. The PE header is an array that includes various directories but the index of interest is the one in the first index which is the Export Table. This table lists all the functions that the DLL exports along with their names and relative addresses. Once access to the Export Table has been successfully found, the code would then have to traverse through the list of exported functions where each entry in the Export Table includes the function's name and an offset from the DLL's base address. Upon comparison of the parsed function's name and the function name the code is looking for, calculation of the absolute address needs to be done by getting the offset and adding it to the base address of the DLL. Once the calculation has been completed, the code should then return the absolute address of that function which means the program can now directly call the Windows API function from anywhere in memory. The following below is the code to do this, along with a graphical representation of traversing internal structures to get to the Exports Table.
 
 ```c
+
 //
 // This function gets the function address from the module
 // 
@@ -253,6 +255,7 @@ inline LPVOID get_func_by_name( LPVOID module, char* function_name )
 
     return return_address;
 }
+
 ```
 
 ![Untitled](https://raw.githubusercontent.com/0xEct0/0xEct0.github.io/main/assets/img/export_table.png)
@@ -1002,6 +1005,7 @@ inline LPVOID get_func_by_name( LPVOID module, char* function_name )
 
     return return_address;
 }
+
 ```
 
 ## From PIC to Shellcode
