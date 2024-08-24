@@ -40,7 +40,7 @@ round-avatar: true
 
 # If you want to have an image logo in the top-left corner instead of having the title of the website,
 # then specify the following parameter
-#title-img: /path/to/image
+title-img: /favicon.ico
 
 
 #####################################
@@ -57,32 +57,32 @@ social-network-links:
   # github: daattali
   twitter: 0xEct0
   # patreon: DeanAttali
-  #youtube: "@daattali"
+  # youtube: "@daattali"
   # whatsapp: 15551212
-#  medium: yourname
-#  reddit: yourname
-#  linkedin: daattali
-#  xing: yourname
-#  stackoverflow: "3943160/daattali"
-#  snapchat: deanat78
-#  instagram: deanat78
-#  spotify: yourname
-#  telephone: +14159998888
-#  steam: deanat78
-#  twitch: yourname
-#  yelp: yourname
-#  telegram: yourname
-#  calendly: yourname
-#  mastodon: instance.url/@username
-#  bluesky: yourname
-#  ORCID: your ORCID ID
-#  google-scholar: your google scholar
-#  discord: "invite_code" or "users/userid" or "invite/invite_code" 
-#  kaggle: yourname
-#  hackerrank: yourname
-#  gitlab: yourname
-#  itchio: yourname
-#  untappd: yourname
+  #  medium: yourname
+  #  reddit: yourname
+  #  linkedin: daattali
+  #  xing: yourname
+  #  stackoverflow: "3943160/daattali"
+  #  snapchat: deanat78
+  #  instagram: deanat78
+  #  spotify: yourname
+  #  telephone: +14159998888
+  #  steam: deanat78
+  #  twitch: yourname
+  #  yelp: yourname
+  #  telegram: yourname
+  #  calendly: yourname
+  #  mastodon: instance.url/@username
+  #  bluesky: yourname
+  #  ORCID: your ORCID ID
+  #  google-scholar: your google scholar
+  #  discord: "invite_code" or "users/userid" or "invite/invite_code" 
+  #  kaggle: yourname
+  #  hackerrank: yourname
+  #  gitlab: yourname
+  #  itchio: yourname
+  #  untappd: yourname
 
 # If you want your website to generate an RSS feed, provide a description
 # The URL for the feed will be https://<your_website>/feed.xml
