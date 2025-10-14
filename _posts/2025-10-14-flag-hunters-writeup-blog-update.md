@@ -5,8 +5,7 @@ subtitle: Writeup for picoCTF 2025 Reverse Engineering challenge and blog update
 tags: [reverse engineering]
 ---
 
-### Blog Update
-Have been extremely busy this past year and have accomplished a lot both professionally and personally. For starters, earlier this year I achieved the Red Team Ops (CRTO) certification from Zero-Point Security, and while waiting for CRTOII to release on RastaMouse's new website, I have been working through the Offensive Development Practicioner Course/Certification (ODPC). I haven't finished the ODPC course yet as it's *very* dense material wise, but my thought is to at the very least finish the ODPC course to acquire the knowledge, then do CRTOII course/certification.
+This past year I have been extremely busy and have accomplished a lot both professionally and personally. For starters, earlier this year I achieved the Red Team Ops (CRTO) certification from Zero-Point Security, and while waiting for CRTOII to release on RastaMouse's new website, I have been working through the Offensive Development Practicioner Course/Certification (ODPC). I haven't finished the ODPC course yet as it's *very* dense material wise, but my thought is to at the very least finish the ODPC course to acquire the knowledge, then do CRTOII course/certification.
 
 Recently, through no fault of the course, I've been feeling a bit burnt out where studying outside of work felt more like a chore rather than out of interest so I've decided to pause on studying ODPC for a bit. 
 
